@@ -1,0 +1,49 @@
+{
+  "uid": "rental-service-dashboard",
+  "title": "Rental Service Dashboard",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP Requests Per Second",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "expr": "sum(rate(http_requests_total[1m])) by (path)",
+          "legendFormat": "{{path}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Errors Per Second",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "expr": "sum(rate(http_requests_total{status=~\"4..|5..\"}[1m])) by (path,status)",
+          "legendFormat": "{{path}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Average Request Duration",
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "expr": "sum(rate(http_request_duration_seconds_sum[1m])) by (path) / sum(rate(http_request_duration_seconds_count[1m])) by (path)",
+          "legendFormat": "{{path}}"
+        }
+      ]
+    }
+  ]
+}

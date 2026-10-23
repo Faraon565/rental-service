@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rental Service</title>
+    <link rel="stylesheet" href="/ui/static/style.css">
+</head>
+<body>
+<header class="header">
+    <div>
+        <p class="eyebrow">Мини-Airbnb</p>
+        <h1>Сервис аренды жилья</h1>
+        <p class="subtitle">Регистрация, авторизация, создание заявок и просмотр статусов бронирования.</p>
+    </div>
+    {{if .IsAuthenticated}}
+    <form method="post" action="/ui/logout">
+        <button class="secondary" type="submit">Выйти</button>
+    </form>
+    {{end}}
+</header>
+
+<main class="container">
+    {{if .Message}}
+    <section class="notice success">{{.Message}}</section>
+    {{end}}
+    {{if .Error}}
+    <section class="notice error">{{.Error}}</section>
+    {{end}}
+
+    {{if .IsAuthenticated}}
+    <section class="status-card">
+        <span>Вы вошли в систему</span>
+        <strong>User ID: {{.UserID}}</strong>
+    </section>
+    {{else}}
+    <section class="grid two">
+        <article class="card">
+            <h2>Регистрация</h2>
+            <form method="post" action="/ui/register" class="form">
+                <label>Email<input name="email" type="email" placeholder="user@mail.com" required></label>
+                <label>Пароль<input name="password" type="password" placeholder="123456" required></label>
+                <label>ФИО<input name="full_name" type="text" placeholder="Иван Иванов" required></label>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>Авторизация</h2>
+            <form method="post" action="/ui/login" class="form">
+                <label>Email<input name="email" type="email" placeholder="user@mail.com" required></label>
+                <label>Пароль<input name="password" type="password" placeholder="123456" required></label>
+                <button type="submit">Войти</button>
+            </form>
+        </article>
+    </section>
+    {{end}}
+
+    {{if .IsAuthenticated}}
+    <section class="grid two">
+        <article class="card">
+            <h2>Добавить жильё</h2>
+            <p class="hint">Объект создаётся от имени текущего пользователя.</p>
+            <form method="post" action="/ui/properties/create" class="form">
+                <label>Название<input name="title" type="text" placeholder="Квартира у метро" required></label>
+                <label>Адрес<input name="address" type="text" placeholder="Москва, ул. Тестовая, 1" required></label>
+                <label>Описание<textarea name="description" rows="3" placeholder="Краткое описание"></textarea></label>
+                <label>Цена за ночь<input name="price_per_night" type="number" min="1" step="0.01" placeholder="4500" required></label>
+                <button type="submit">Создать жильё</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>Создать бронирование</h2>
+            <p class="hint">User ID берётся из JWT-cookie, вручную передавать его не нужно.</p>
+            <form method="post" action="/ui/bookings/create" class="form">
+                <label>ID жилья<input name="property_id" type="number" min="1" placeholder="1" required></label>
+                <label>Дата начала<input name="date_from" type="date" required></label>
+                <label>Дата окончания<input name="date_to" type="date" required></label>
+                <button type="submit">Создать заявку</button>
+            </form>
+        </article>
+    </section>
+    {{end}}
+
+    <section class="card wide">
+        <div class="section-head">
+            <h2>Доступное жильё</h2>
+            <span>{{len .Properties}} объектов</span>
+        </div>
+        {{if .Properties}}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Адрес</th>
+                    <th>Цена за ночь</th>
+                    <th>Описание</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Properties}}
+                <tr>
+                    <td>{{.ID}}</td>
+                    <td>{{.Title}}</td>
+                    <td>{{.Address}}</td>
+                    <td>{{.PricePerNight}}</td>
+                    <td>{{.Description}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <p class="empty">Пока нет созданных объектов жилья.</p>
+        {{end}}
+    </section>
+
+    {{if .IsAuthenticated}}
+    <section class="card wide">
+        <div class="section-head">
+            <h2>Мои бронирования</h2>
+            <span>{{len .Bookings}} заявок</span>
+        </div>
+        {{if .Bookings}}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Жильё</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Статус</th>
+                    <th>Создано</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Bookings}}
+                <tr>
+                    <td>{{.ID}}</td>
+                    <td>{{.PropertyTitle}} <span class="muted">#{{.PropertyID}}</span></td>
+                    <td>{{.DateFrom}}</td>
+                    <td>{{.DateTo}}</td>
+                    <td><span class="badge">{{.Status}}</span></td>
+                    <td>{{.CreatedAt}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <p class="empty">У пользователя пока нет заявок на бронирование.</p>
+        {{end}}
+    </section>
+    {{end}}
+</main>
+</body>
+</html>

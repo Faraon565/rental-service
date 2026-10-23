@@ -1,0 +1,5 @@
+.git
+.gitignore
+__MACOSX
+.DS_Store
+*.zip
